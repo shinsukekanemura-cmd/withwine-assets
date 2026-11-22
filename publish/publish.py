@@ -23,6 +23,9 @@ PLAN = json.loads((ROOT / "plan.json").read_text(encoding="utf-8"))
 TOKEN = os.environ["META_ACCESS_TOKEN"]
 IG = os.environ["INSTAGRAM_ACCOUNT_ID"]
 DRY = "--dry-run" in sys.argv
+# 動作確認用：--date 2026-11-23 のように日付を指定できる
+_d = [a.split("=", 1)[1] for a in sys.argv if a.startswith("--date=")]
+FORCE_DATE = _d[0] if _d else None
 
 
 def call(method, path, **params):
@@ -98,6 +101,10 @@ def publish_reel(item):
 
 def main():
     today = datetime.now(JST).date()
+    if FORCE_DATE:
+        from datetime import date as _date
+        today = _date.fromisoformat(FORCE_DATE)
+        print(f"（指定された日付 {today} で動かします）")
     item = next((x for x in PLAN["items"] if x["date"] == today.isoformat()), None)
     if not item:
         print(f"{today} は投稿予定なし")

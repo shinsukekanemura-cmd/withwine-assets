@@ -10,6 +10,10 @@ on:
         description: "公開せずコンテナ作成まで試す"
         type: boolean
         default: false
+      date:
+        description: "動作確認用：この日付の予定で試す（例 2026-11-23）"
+        type: string
+        default: ""
 
 jobs:
   publish:
@@ -25,8 +29,7 @@ jobs:
           META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
           INSTAGRAM_ACCOUNT_ID: ${{ secrets.INSTAGRAM_ACCOUNT_ID }}
         run: |
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
-            python publish/publish.py --dry-run
-          else
-            python publish/publish.py
-          fi
+          ARGS=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          if [ -n "${{ inputs.date }}" ]; then ARGS="$ARGS --date=${{ inputs.date }}"; fi
+          python publish/publish.py $ARGS
